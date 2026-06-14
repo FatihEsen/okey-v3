@@ -415,6 +415,19 @@ export default function App() {
     return gameState.players[mySeatIndex];
   }, [gameState, mySeatIndex]);
 
+  const playableIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (!gameState || !isMyTurn || gameState.phase !== GamePhase.DISCARDING) return ids;
+    if (!activePlayer || !activePlayer.hasOpened) return ids;
+
+    activePlayer.hand.forEach(t => {
+      if (t && isPlayableAnywhere(t, gameState.players, gameState.okeyTile)) {
+        ids.add(t.id);
+      }
+    });
+    return ids;
+  }, [gameState, isMyTurn, activePlayer]);
+
   // Turn snapshots to rollback opened tiles or processed tiles
   const saveTurnSnapshot = (state: GameState) => {
     if (state.turnSnapshot) return state; // Only save first snapshot of turn
@@ -663,13 +676,15 @@ export default function App() {
       const contiguousValue = contiguous.reduce((sum, s) => sum + s.score, 0);
       const algorithmicValue = algorithmicSets.reduce((sum, s) => sum + s.score, 0);
       
-      // If the user has arranged some contiguous sets, respect their arrangement over algorithmic fallback.
-      // This prevents separated tiles from being pulled back into sets against the user's will.
-      if (contiguous.length > 0) {
+      // If the user has arranged some contiguous sets and they meet the threshold, respect their arrangement over algorithmic fallback.
+      // This prevents separated tiles from being pulled back into sets against the user's will, but still allows auto-open if needed.
+      if (contiguousValue >= minThreshold) {
         sets = contiguous;
       } else if (algorithmicValue >= minThreshold) {
         sets = algorithmicSets;
         isAutoAll = true;
+      } else {
+        sets = contiguous;
       }
     }
 
@@ -759,12 +774,14 @@ export default function App() {
       const allTiles = activePlayer.hand.filter((t): t is Tile => t !== null);
       const allHandPairs = findPairs(allTiles, gameState!.okeyTile);
       
-      // If user has manually arranged pairs contiguously, respect their layout.
-      if (contiguous.length > 0) {
+      // If user has manually arranged pairs contiguously and it meets the threshold, respect their layout.
+      if (contiguous.length >= minThreshold) {
         pairs = contiguous;
       } else if (allHandPairs.length >= minThreshold) {
         pairs = allHandPairs;
         isAutoAll = true;
+      } else {
+        pairs = contiguous;
       }
     }
 
@@ -1534,6 +1551,7 @@ export default function App() {
                     dealingKey={dealingKey}
                     phase={gameState.phase}
                     onDiscardTile={handleDiscardTile}
+                    highlightedIds={playableIds}
                     doubleOpenedInGame={gameState.players.some(p => p.hasOpened && p.openedWithType === "pairs") || gameState.currentOpenPairs > 0}
                   />
 

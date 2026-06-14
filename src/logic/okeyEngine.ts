@@ -404,10 +404,12 @@ export const getContiguousPairs = (hand: (Tile | null)[], okeyTile: { number: nu
     if (hand[i] && hand[i + 1] && !usedInContiguous.has(hand[i]!.id) && !usedInContiguous.has(hand[i + 1]!.id)) {
       const t1 = hand[i]!;
       const t2 = hand[i + 1]!;
+      const isOkey1 = isWildcard(t1, okeyTile);
+      const isOkey2 = isWildcard(t2, okeyTile);
       const eff1 = getEffectiveTile(t1, okeyTile);
       const eff2 = getEffectiveTile(t2, okeyTile);
 
-      if (eff1.number === eff2.number && eff1.color === eff2.color) {
+      if (isOkey1 || isOkey2 || (eff1.number === eff2.number && eff1.color === eff2.color)) {
         contiguousPairs.push([t1, t2]);
         usedInContiguous.add(t1.id);
         usedInContiguous.add(t2.id);

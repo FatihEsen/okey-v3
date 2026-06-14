@@ -293,6 +293,7 @@ const Rack: React.FC<RackProps> = ({
               <div
                 key={dealingKey !== undefined ? `${dealingKey}-${slotIdx}` : slotIdx}
                 className={dealingKey !== undefined ? "tile-deal-in" : undefined}
+                title={isHighlighted ? "Bu taşı yere (serilere veya çiftlere) işleyebilirsiniz" : undefined}
                 style={{
                   opacity: isGhost ? 0.3 : isPreview ? 0.7 : 1,
                   transform: isSelected && !dragState?.started ? "translateY(-6px)" : "none",
@@ -300,7 +301,7 @@ const Rack: React.FC<RackProps> = ({
                   animationDelay: dealingKey !== undefined ? `${slotIdx * 18}ms` : undefined,
                   outline: isHoveredTarget && dragState?.started
                     ? "2px solid #3b82f6"
-                    : isHighlighted && !isSelected
+                    : isHighlighted
                     ? "2px solid #4ade80"
                     : "none",
                   outlineOffset: "2px",
@@ -352,6 +353,7 @@ export const PlayerHand = ({
   dealingKey,
   phase,
   onDiscardTile,
+  highlightedIds,
   doubleOpenedInGame = false,
 }: {
   player: Player;
@@ -369,6 +371,7 @@ export const PlayerHand = ({
   dealingKey?: number;
   phase?: string;
   onDiscardTile?: (tileId: string) => void;
+  highlightedIds?: Set<string>;
   doubleOpenedInGame?: boolean;
 }) => {
   const lastClickRef = useRef<{ id: string; time: number } | null>(null);
@@ -494,6 +497,7 @@ export const PlayerHand = ({
               onSelect={handleSelect}
               onReorder={onHandReorder}
               disabled={player.isAI}
+              highlightedIds={highlightedIds}
               dealingKey={!player.isAI ? dealingKey : undefined}
             />
           </div>
