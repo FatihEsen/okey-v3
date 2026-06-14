@@ -1,0 +1,6 @@
+{
+  "name": "101 Okey Pro",
+  "description": "Profesyonel 101 Okey (Yüzbir) oyunu. Katlamalı ve Katlamasız mod seçenekleri, akıllı AI rakipler ve detaylı kural seti ile.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
